@@ -116,7 +116,7 @@ app.get("/oauth-callback", async (req, res) => {
 
     // Once the tokens have been retrieved, use them to make a query
     // to the HubSpot API
-    res.redirect(`/`);
+    res.redirect(`/?code=${req.query.code}`);
   }
 });
 
@@ -228,15 +228,75 @@ const displayContactName = (res, contact) => {
 
 app.get("/", async (req, res) => {
   res.setHeader("Content-Type", "text/html");
-  res.write(`<h2>HubSpot OAuth 2.0 Quickstart App</h2>`);
+
+  // Styling for centering the card
+  const style = `
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .card {
+        text-align: center;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+      }
+    </style>
+  `;
+
+  res.write(style);
+
+  res.write("<div class='card'>");
+  res.write("<h1>Tinkle PoC</h1>");
+  res.write("<h2>HubSpot OAuth 2.0 Quickstart App</h2>");
+
   if (isAuthorized(req.sessionID)) {
     const accessToken = await getAccessToken(req.sessionID);
     const contact = await getContact(accessToken);
     res.write(`<h4>Access token: ${accessToken}</h4>`);
     displayContactName(res, contact);
   } else {
-    res.write(`<a href="/install"><h3>Install the app</h3></a>`);
+    res.write("<a href='/install'><h3>Install the app</h3></a>");
   }
+
+  res.write("</div>");
+  res.end();
+});
+
+app.get("/error", (req, res) => {
+  res.setHeader("Content-Type", "text/html");
+
+  const style = `
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .error-card {
+        text-align: center;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #ffe6e6;
+      }
+    </style>
+  `;
+
+  res.write(style);
+
+  res.write("<div class='error-card'>");
+  res.write(`<h4>Error: ${req.query.msg}</h4>`);
+  res.write("</div>");
   res.end();
 });
 
